@@ -46,11 +46,11 @@ class TradeRepository(private val tradeDao: TradeDao) {
         val closedCount = getClosedTradesCount()
         if (closedCount == 0) return 0f
 
-        val winningTrades = getAllTrades()
+        val winningTradeCount = getAllTrades()
             .firstOrNull()
             .orEmpty()
             .count { it.status == "CLOSED" && it.profitLoss > 0 }
-        return if (closedCount > 0) (winningTrades.toFloat() / closedCount) * 100 else 0f
+        return if (closedCount > 0) (winningTradeCount.toFloat() / closedCount) * 100 else 0f
     }
 
     suspend fun deleteAllTrades() {
