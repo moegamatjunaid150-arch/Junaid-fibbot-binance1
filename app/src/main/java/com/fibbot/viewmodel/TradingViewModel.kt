@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.fibbot.repository.CandleRepository
 import com.fibbot.repository.PriceRepository
 import com.fibbot.repository.TradeRepository
+import com.fibbot.security.ApiKeyManager
 import com.fibbot.strategy.SignalGenerator
 import com.fibbot.strategy.RiskManager
 import com.fibbot.database.entity.TradeEntity
@@ -12,12 +13,14 @@ import com.fibbot.models.TradingSignal
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
+
 class TradingViewModel(
     private val candleRepository: CandleRepository,
     private val tradeRepository: TradeRepository,
     private val priceRepository: PriceRepository,
     private val signalGenerator: SignalGenerator,
-    private val riskManager: RiskManager
+    private val riskManager: RiskManager,
+    private val apiKeyManager: ApiKeyManager
 ) : ViewModel() {
 
     private val _tradingSignals = MutableSharedFlow<TradingSignal>()
@@ -32,7 +35,12 @@ class TradingViewModel(
     private val _isTrading = MutableStateFlow(false)
     val isTrading: StateFlow<Boolean> = _isTrading.asStateFlow()
 
+    private val _hasApiKeys = MutableStateFlow(false)
+    val hasApiKeys: StateFlow<Boolean> = _hasApiKeys.asStateFlow()
+
     init {
+        _hasApiKeys.value = apiKeyManager.hasApiKeys()
+
         viewModelScope.launch {
             tradeRepository.getOpenTrades().collect { trades ->
                 _currentTrades.value = trades
@@ -111,13 +119,13 @@ class TradingViewModel(
             takeProfit = takeProfit,
             entryTime = System.currentTimeMillis(),
             status = "OPEN",
-            isPaperTrade = true,
+            isPaperTrade = !apiKeyManager.hasApiKeys(),
             profitLoss = 0.0,
             profitLossPercent = 0.0
         )
 
         val tradeId = tradeRepository.insertTrade(trade)
-        Timber.d("Trade opened: $tradeId for ${signal.symbol}")
+        Timber.d("Trade opened: $tradeId for ${signal.symbol} (paper=${trade.isPaperTrade})")
     }
 
     fun closeOpenTrades() {
@@ -147,5 +155,9 @@ class TradingViewModel(
                 }
             }
         }
+    }
+
+    fun refreshApiKeyStatus() {
+        _hasApiKeys.value = apiKeyManager.hasApiKeys()
     }
 }

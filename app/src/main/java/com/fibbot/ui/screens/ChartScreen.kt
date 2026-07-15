@@ -1,24 +1,24 @@
 package com.fibbot.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.fibbot.viewmodel.ChartViewModel
 import com.fibbot.models.ChartData
 
 @Composable
-fun ChartScreen(viewModel: ChartViewModel) {
+fun ChartScreen(viewModel: ChartViewModel, modifier: Modifier = Modifier) {
     val chartData by viewModel.chartData.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     var selectedSymbol by remember { mutableStateOf("BTCUSDT") }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

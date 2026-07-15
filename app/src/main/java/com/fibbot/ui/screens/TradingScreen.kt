@@ -12,13 +12,13 @@ import com.fibbot.viewmodel.TradingViewModel
 import com.fibbot.database.entity.TradeEntity
 
 @Composable
-fun TradingScreen(viewModel: TradingViewModel) {
+fun TradingScreen(viewModel: TradingViewModel, modifier: Modifier = Modifier) {
     val isTrading by viewModel.isTrading.collectAsState()
     val currentTrades by viewModel.currentTrades.collectAsState()
     val totalProfitLoss by viewModel.totalProfitLoss.collectAsState()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

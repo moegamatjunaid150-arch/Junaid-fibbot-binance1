@@ -36,6 +36,13 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = '1.5.3'
     }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += '/META-INF/INDEX.LIST'
+            excludes += '/META-INF/io.netty.versions.properties'
+        }
+    }
 }
 
 dependencies {
@@ -69,10 +76,6 @@ dependencies {
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
-
-    // WebSocket
-    implementation 'com.google.code.gson:gson:2.10.1'
 
     // Timber Logging
     implementation 'com.jakewharton.timber:timber:5.0.1'
