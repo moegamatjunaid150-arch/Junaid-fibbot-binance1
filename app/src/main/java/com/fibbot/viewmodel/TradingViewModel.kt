@@ -93,8 +93,9 @@ class TradingViewModel(
 
                     if (signal != null) {
                         _tradingSignals.emit(signal)
-                        if (signal.signalType != SignalType.HOLD) {
-                            executeTrade(signal, priceEntity.price)
+                        when (signal.signalType) {
+                            SignalType.BUY, SignalType.SELL -> executeTrade(signal, priceEntity.price)
+                            SignalType.HOLD -> Unit
                         }
                     }
                 }
