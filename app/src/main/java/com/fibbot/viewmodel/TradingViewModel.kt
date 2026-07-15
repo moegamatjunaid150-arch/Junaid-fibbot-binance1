@@ -10,6 +10,8 @@ import com.fibbot.strategy.SignalGenerator
 import com.fibbot.strategy.RiskManager
 import com.fibbot.database.entity.TradeEntity
 import com.fibbot.models.TradingSignal
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -59,8 +61,16 @@ class TradingViewModel(
                 candleRepository.fetchAndCacheCandles(symbol, interval)
                 priceRepository.fetchAndCachePrice(symbol)
 
-                val candles = candleRepository.getCandlesBySymbolAndInterval(symbol, interval).firstOrNull()
-                val priceEntity = priceRepository.getPriceBySymbol(symbol).firstOrNull()
+                val (candles, priceEntity) = coroutineScope {
+                    val candlesDeferred = async {
+                        candleRepository.getCandlesBySymbolAndInterval(symbol, interval).firstOrNull()
+                    }
+                    val priceDeferred = async {
+                        priceRepository.getPriceBySymbol(symbol).firstOrNull()
+                    }
+
+                    candlesDeferred.await() to priceDeferred.await()
+                }
 
                 if (!candles.isNullOrEmpty() && priceEntity != null) {
                     val candleMap = candles.map { candle ->

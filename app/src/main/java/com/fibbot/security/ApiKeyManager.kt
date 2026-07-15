@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import timber.log.Timber
 
 /**
  * Manages Binance API keys securely using EncryptedSharedPreferences.
@@ -11,6 +12,7 @@ import androidx.security.crypto.MasterKey
  * Data is encrypted at rest using AES256-GCM (key) and AES256-SIV (value).
  */
 class ApiKeyManager(private val context: Context) {
+    private var encryptedStorageAvailable = true
 
     private val prefs: SharedPreferences by lazy {
         try {
@@ -25,7 +27,8 @@ class ApiKeyManager(private val context: Context) {
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
         } catch (e: Exception) {
-            // Fallback to plain SharedPreferences if encryption is unavailable
+            encryptedStorageAvailable = false
+            Timber.w(e, "EncryptedSharedPreferences unavailable; falling back to plain storage")
             context.getSharedPreferences(PREFS_NAME + "_plain", Context.MODE_PRIVATE)
         }
     }
@@ -50,6 +53,11 @@ class ApiKeyManager(private val context: Context) {
     }
 
     fun hasApiKeys(): Boolean = getApiKey().isNotEmpty() && getApiSecret().isNotEmpty()
+
+    fun isEncryptedStorageAvailable(): Boolean {
+        prefs
+        return encryptedStorageAvailable
+    }
 
     companion object {
         private const val PREFS_NAME = "fibbot_api_keys_encrypted"

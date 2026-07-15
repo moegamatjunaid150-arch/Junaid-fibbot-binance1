@@ -19,6 +19,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, modifier: Modifier = Modifier) 
     val apiKey by viewModel.apiKey.collectAsState()
     val apiSecret by viewModel.apiSecret.collectAsState()
     val saveStatus by viewModel.saveStatus.collectAsState()
+    val isEncryptedStorageAvailable by viewModel.isEncryptedStorageAvailable.collectAsState()
     var showApiKey by remember { mutableStateOf(false) }
     var showSecret by remember { mutableStateOf(false) }
 
@@ -49,6 +50,14 @@ fun SettingsScreen(viewModel: SettingsViewModel, modifier: Modifier = Modifier) 
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                if (!isEncryptedStorageAvailable) {
+                    Text(
+                        text = "⚠ Secure encrypted storage is unavailable on this device. Saved API keys will be stored locally without encryption.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
 
                 OutlinedTextField(
                     value = apiKey,

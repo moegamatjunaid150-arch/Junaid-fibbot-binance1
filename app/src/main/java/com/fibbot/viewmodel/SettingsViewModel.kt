@@ -19,6 +19,11 @@ class SettingsViewModel(
     private val _saveStatus = MutableStateFlow("")
     val saveStatus: StateFlow<String> = _saveStatus.asStateFlow()
 
+    private val _isEncryptedStorageAvailable =
+        MutableStateFlow(apiKeyManager.isEncryptedStorageAvailable())
+    val isEncryptedStorageAvailable: StateFlow<Boolean> =
+        _isEncryptedStorageAvailable.asStateFlow()
+
     fun updateApiKey(key: String) {
         _apiKey.value = key
         _saveStatus.value = ""
