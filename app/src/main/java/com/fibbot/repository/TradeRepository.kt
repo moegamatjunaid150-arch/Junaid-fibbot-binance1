@@ -3,7 +3,7 @@ package com.fibbot.repository
 import com.fibbot.database.dao.TradeDao
 import com.fibbot.database.entity.TradeEntity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 
 class TradeRepository(private val tradeDao: TradeDao) {
     fun getTradesBySymbol(symbol: String): Flow<List<TradeEntity>> {
@@ -47,7 +47,8 @@ class TradeRepository(private val tradeDao: TradeDao) {
         if (closedCount == 0) return 0f
 
         val winningTrades = getAllTrades()
-            .first()
+            .firstOrNull()
+            .orEmpty()
             .count { it.status == "CLOSED" && it.profitLoss > 0 }
         return if (closedCount > 0) (winningTrades.toFloat() / closedCount) * 100 else 0f
     }
