@@ -14,23 +14,21 @@ import timber.log.Timber
 class ApiKeyManager(private val context: Context) {
     private var encryptedStorageAvailable = true
 
-    private val prefs: SharedPreferences by lazy {
-        try {
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-            EncryptedSharedPreferences.create(
-                context,
-                PREFS_NAME,
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        } catch (e: Exception) {
-            encryptedStorageAvailable = false
-            Timber.w(e, "EncryptedSharedPreferences unavailable; falling back to plain storage")
-            context.getSharedPreferences(PREFS_NAME + "_plain", Context.MODE_PRIVATE)
-        }
+    private val prefs: SharedPreferences = try {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        EncryptedSharedPreferences.create(
+            context,
+            PREFS_NAME,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } catch (e: Exception) {
+        encryptedStorageAvailable = false
+        Timber.w(e, "EncryptedSharedPreferences unavailable; falling back to plain storage")
+        context.getSharedPreferences(PREFS_NAME + "_plain", Context.MODE_PRIVATE)
     }
 
     fun getApiKey(): String = prefs.getString(KEY_API_KEY, "") ?: ""
@@ -54,10 +52,7 @@ class ApiKeyManager(private val context: Context) {
 
     fun hasApiKeys(): Boolean = getApiKey().isNotEmpty() && getApiSecret().isNotEmpty()
 
-    fun isEncryptedStorageAvailable(): Boolean {
-        prefs
-        return encryptedStorageAvailable
-    }
+    fun isEncryptedStorageAvailable(): Boolean = encryptedStorageAvailable
 
     companion object {
         private const val PREFS_NAME = "fibbot_api_keys_encrypted"

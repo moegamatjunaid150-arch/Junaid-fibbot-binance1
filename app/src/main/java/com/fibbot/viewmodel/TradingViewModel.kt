@@ -9,6 +9,7 @@ import com.fibbot.security.ApiKeyManager
 import com.fibbot.strategy.SignalGenerator
 import com.fibbot.strategy.RiskManager
 import com.fibbot.database.entity.TradeEntity
+import com.fibbot.models.SignalType
 import com.fibbot.models.TradingSignal
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -92,7 +93,7 @@ class TradingViewModel(
 
                     if (signal != null) {
                         _tradingSignals.emit(signal)
-                        if (signal.signalType != com.fibbot.models.SignalType.HOLD) {
+                        if (signal.signalType != SignalType.HOLD) {
                             executeTrade(signal, priceEntity.price)
                         }
                     }
@@ -121,8 +122,8 @@ class TradingViewModel(
         }
 
         val side = when (signal.signalType) {
-            com.fibbot.models.SignalType.BUY -> "BUY"
-            com.fibbot.models.SignalType.SELL -> "SELL"
+            SignalType.BUY -> "BUY"
+            SignalType.SELL -> "SELL"
             else -> return
         }
 
