@@ -7,12 +7,14 @@ import com.fibbot.database.FibBotDatabase
 import com.fibbot.repository.CandleRepository
 import com.fibbot.repository.TradeRepository
 import com.fibbot.repository.PriceRepository
+import com.fibbot.security.ApiKeyManager
 import com.fibbot.strategy.FibonacciCalculator
 import com.fibbot.strategy.TechnicalIndicators
 import com.fibbot.strategy.SignalGenerator
 import com.fibbot.strategy.RiskManager
 import com.fibbot.viewmodel.TradingViewModel
 import com.fibbot.viewmodel.ChartViewModel
+import com.fibbot.viewmodel.SettingsViewModel
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -26,11 +28,13 @@ object DependencyInjection {
     private lateinit var okHttpClient: OkHttpClient
     private lateinit var gson: Gson
     private lateinit var retrofit: Retrofit
+    private lateinit var apiKeyManager: ApiKeyManager
 
     fun init(appContext: Context) {
         context = appContext
         database = FibBotDatabase.getInstance(context)
         gson = Gson()
+        apiKeyManager = ApiKeyManager(appContext)
         okHttpClient = buildOkHttpClient()
         retrofit = buildRetrofit()
     }
@@ -63,6 +67,8 @@ object DependencyInjection {
     fun provideBinanceWebSocketManager(): BinanceWebSocketManager {
         return BinanceWebSocketManager(okHttpClient, gson)
     }
+
+    fun provideApiKeyManager(): ApiKeyManager = apiKeyManager
 
     fun provideCandleRepository(): CandleRepository {
         return CandleRepository(
@@ -111,7 +117,8 @@ object DependencyInjection {
             provideTradeRepository(),
             providePriceRepository(),
             provideSignalGenerator(),
-            provideRiskManager()
+            provideRiskManager(),
+            provideApiKeyManager()
         )
     }
 
@@ -120,5 +127,9 @@ object DependencyInjection {
             provideCandleRepository(),
             provideTechnicalIndicators()
         )
+    }
+
+    fun provideSettingsViewModel(): SettingsViewModel {
+        return SettingsViewModel(provideApiKeyManager())
     }
 }

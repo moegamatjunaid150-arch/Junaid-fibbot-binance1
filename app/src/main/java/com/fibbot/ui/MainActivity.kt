@@ -9,17 +9,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.fibbot.viewmodel.TradingViewModel
 import com.fibbot.viewmodel.ChartViewModel
-import com.fibbot.ui.screens.TradingScreen
-import com.fibbot.ui.screens.ChartScreen
+import com.fibbot.viewmodel.SettingsViewModel
 
 enum class NavigationItem {
-    TRADING, CHART
+    TRADING, CHART, SETTINGS
 }
 
 @Composable
 fun MainApp(
     tradingViewModel: TradingViewModel,
-    chartViewModel: ChartViewModel
+    chartViewModel: ChartViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     var selectedItem by remember { mutableStateOf(NavigationItem.TRADING) }
 
@@ -38,38 +38,28 @@ fun MainApp(
                     label = { Text("Chart") },
                     icon = { Text("C") }
                 )
+                NavigationBarItem(
+                    selected = selectedItem == NavigationItem.SETTINGS,
+                    onClick = { selectedItem = NavigationItem.SETTINGS },
+                    label = { Text("Settings") },
+                    icon = { Text("⚙") }
+                )
             }
         }
     ) { innerPadding ->
         when (selectedItem) {
-            NavigationItem.TRADING -> TradingScreen(
+            NavigationItem.TRADING -> com.fibbot.ui.screens.TradingScreen(
                 viewModel = tradingViewModel,
                 modifier = Modifier.padding(innerPadding)
             )
-            NavigationItem.CHART -> ChartScreen(
+            NavigationItem.CHART -> com.fibbot.ui.screens.ChartScreen(
                 viewModel = chartViewModel,
+                modifier = Modifier.padding(innerPadding)
+            )
+            NavigationItem.SETTINGS -> com.fibbot.ui.screens.SettingsScreen(
+                viewModel = settingsViewModel,
                 modifier = Modifier.padding(innerPadding)
             )
         }
     }
-}
-
-@Composable
-fun TradingScreen(
-    viewModel: TradingViewModel,
-    modifier: Modifier = Modifier
-) {
-    com.fibbot.ui.screens.TradingScreen(
-        viewModel = viewModel
-    )
-}
-
-@Composable
-fun ChartScreen(
-    viewModel: ChartViewModel,
-    modifier: Modifier = Modifier
-) {
-    com.fibbot.ui.screens.ChartScreen(
-        viewModel = viewModel
-    )
 }
