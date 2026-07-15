@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.fibbot.repository.CandleRepository
 import com.fibbot.repository.PriceRepository
 import com.fibbot.repository.TradeRepository
+import com.fibbot.security.ApiKeyManager
 import com.fibbot.strategy.SignalGenerator
 import com.fibbot.strategy.RiskManager
 import com.fibbot.database.entity.TradeEntity
@@ -12,12 +13,14 @@ import com.fibbot.models.TradingSignal
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
+
 class TradingViewModel(
     private val candleRepository: CandleRepository,
     private val tradeRepository: TradeRepository,
     private val priceRepository: PriceRepository,
     private val signalGenerator: SignalGenerator,
-    private val riskManager: RiskManager
+    private val riskManager: RiskManager,
+    private val apiKeyManager: ApiKeyManager
 ) : ViewModel() {
 
     private val _tradingSignals = MutableSharedFlow<TradingSignal>()
@@ -32,7 +35,12 @@ class TradingViewModel(
     private val _isTrading = MutableStateFlow(false)
     val isTrading: StateFlow<Boolean> = _isTrading.asStateFlow()
 
+    private val _hasApiKeys = MutableStateFlow(false)
+    val hasApiKeys: StateFlow<Boolean> = _hasApiKeys.asStateFlow()
+
     init {
+        _hasApiKeys.value = apiKeyManager.hasApiKeys()
+
         viewModelScope.launch {
             tradeRepository.getOpenTrades().collect { trades ->
                 _currentTrades.value = trades
@@ -51,30 +59,31 @@ class TradingViewModel(
                 candleRepository.fetchAndCacheCandles(symbol, interval)
                 priceRepository.fetchAndCachePrice(symbol)
 
-                candleRepository.getCandlesBySymbolAndInterval(symbol, interval).collect { candles ->
-                    priceRepository.getPriceBySymbol(symbol).collect { priceEntity ->
-                        if (candles.isNotEmpty() && priceEntity != null) {
-                            val candleMap = candles.map { candle ->
-                                mapOf(
-                                    "open" to candle.open,
-                                    "high" to candle.high,
-                                    "low" to candle.low,
-                                    "close" to candle.close,
-                                    "volume" to candle.volume
-                                )
-                            }
+                val candles = candleRepository.getCandlesBySymbolAndInterval(symbol, interval).firstOrNull()
+                val priceEntity = priceRepository.getPriceBySymbol(symbol).firstOrNull()
 
-                            val signal = signalGenerator.generateSignal(
-                                symbol,
-                                candleMap,
-                                priceEntity.price,
-                                System.currentTimeMillis()
-                            )
+                if (!candles.isNullOrEmpty() && priceEntity != null) {
+                    val candleMap = candles.map { candle ->
+                        mapOf(
+                            "open" to candle.open,
+                            "high" to candle.high,
+                            "low" to candle.low,
+                            "close" to candle.close,
+                            "volume" to candle.volume
+                        )
+                    }
 
-                            if (signal != null) {
-                                _tradingSignals.emit(signal)
-                                executeTrade(signal, priceEntity.price)
-                            }
+                    val signal = signalGenerator.generateSignal(
+                        symbol,
+                        candleMap,
+                        priceEntity.price,
+                        System.currentTimeMillis()
+                    )
+
+                    if (signal != null) {
+                        _tradingSignals.emit(signal)
+                        if (signal.signalType != com.fibbot.models.SignalType.HOLD) {
+                            executeTrade(signal, priceEntity.price)
                         }
                     }
                 }
@@ -101,28 +110,35 @@ class TradingViewModel(
             return
         }
 
+        val side = when (signal.signalType) {
+            com.fibbot.models.SignalType.BUY -> "BUY"
+            com.fibbot.models.SignalType.SELL -> "SELL"
+            else -> return
+        }
+
         val trade = TradeEntity(
             id = 0,
             symbol = signal.symbol,
-            side = if (signal.signalType.name == "BUY") "BUY" else "SELL",
+            side = side,
             entryPrice = currentPrice,
             quantity = positionSize,
             stopLoss = stopLoss,
             takeProfit = takeProfit,
             entryTime = System.currentTimeMillis(),
             status = "OPEN",
-            isPaperTrade = true,
+            isPaperTrade = !apiKeyManager.hasApiKeys(),
             profitLoss = 0.0,
             profitLossPercent = 0.0
         )
 
         val tradeId = tradeRepository.insertTrade(trade)
-        Timber.d("Trade opened: $tradeId for ${signal.symbol}")
+        Timber.d("Trade opened: $tradeId for ${signal.symbol} (side=$side, paper=${trade.isPaperTrade})")
     }
 
     fun closeOpenTrades() {
         viewModelScope.launch {
-            priceRepository.getAllPrices().collect { prices ->
+            try {
+                val prices = priceRepository.getAllPrices().firstOrNull() ?: return@launch
                 _currentTrades.value.forEach { trade ->
                     val price = prices.find { it.symbol == trade.symbol }?.price
                     if (price != null) {
@@ -145,7 +161,13 @@ class TradingViewModel(
                         _totalProfitLoss.value += pl
                     }
                 }
+            } catch (e: Exception) {
+                Timber.e(e, "Error closing trades")
             }
         }
+    }
+
+    fun refreshApiKeyStatus() {
+        _hasApiKeys.value = apiKeyManager.hasApiKeys()
     }
 }

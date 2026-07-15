@@ -10,6 +10,7 @@ import com.fibbot.di.DependencyInjection
 import com.fibbot.ui.MainApp
 import com.fibbot.ui.theme.FibBotTheme
 import com.fibbot.viewmodel.ChartViewModel
+import com.fibbot.viewmodel.SettingsViewModel
 import com.fibbot.viewmodel.TradingViewModel
 
 class MainActivity : ComponentActivity() {
@@ -21,6 +22,10 @@ class MainActivity : ComponentActivity() {
         dependencyFactory { DependencyInjection.provideChartViewModel() }
     }
 
+    private val settingsViewModel by viewModels<SettingsViewModel> {
+        dependencyFactory { DependencyInjection.provideSettingsViewModel() }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,7 +33,8 @@ class MainActivity : ComponentActivity() {
             FibBotTheme {
                 MainApp(
                     tradingViewModel = tradingViewModel,
-                    chartViewModel = chartViewModel
+                    chartViewModel = chartViewModel,
+                    settingsViewModel = settingsViewModel
                 )
             }
         }
