@@ -1,0 +1,153 @@
+package com.fibbot.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.fibbot.repository.CandleRepository
+import com.fibbot.repository.TradeRepository
+import com.fibbot.repository.PriceRepository
+import com.fibbot.strategy.SignalGenerator
+import com.fibbot.strategy.RiskManager
+import com.fibbot.models.TradeEntity
+import com.fibbot.models.TradingSignal
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.UUID
+
+class TradingViewModel(
+    private val candleRepository: CandleRepository,
+    private val tradeRepository: TradeRepository,
+    private val priceRepository: PriceRepository,
+    private val signalGenerator: SignalGenerator,
+    private val riskManager: RiskManager
+) : ViewModel() {
+
+    private val _tradingSignals = MutableSharedFlow<TradingSignal>()
+    val tradingSignals: SharedFlow<TradingSignal> = _tradingSignals.asSharedFlow()
+
+    private val _currentTrades = MutableStateFlow<List<TradeEntity>>(emptyList())
+    val currentTrades: StateFlow<List<TradeEntity>> = _currentTrades.asStateFlow()
+
+    private val _totalProfitLoss = MutableStateFlow(0.0)
+    val totalProfitLoss: StateFlow<Double> = _totalProfitLoss.asStateFlow()
+
+    private val _isTrading = MutableStateFlow(false)
+    val isTrading: StateFlow<Boolean> = _isTrading.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            tradeRepository.getOpenTrades().collect { trades ->
+                _currentTrades.value = trades
+            }
+        }
+
+        viewModelScope.launch {
+            _totalProfitLoss.value = tradeRepository.getTotalProfitLoss()
+        }
+    }
+
+    fun analyzeAndTrade(symbol: String, interval: String = "1m") {
+        viewModelScope.launch {
+            try {
+                _isTrading.value = true
+                candleRepository.fetchAndCacheCandles(symbol, interval)
+                priceRepository.fetchAndCachePrice(symbol)
+
+                candleRepository.getCandlesBySymbolAndInterval(symbol, interval).collect { candles ->
+                    priceRepository.getPriceBySymbol(symbol).collect { priceEntity ->
+                        if (candles.isNotEmpty() && priceEntity != null) {
+                            val candleMap = candles.map { candle ->
+                                mapOf(
+                                    "open" to candle.open,
+                                    "high" to candle.high,
+                                    "low" to candle.low,
+                                    "close" to candle.close,
+                                    "volume" to candle.volume
+                                )
+                            }
+
+                            val signal = signalGenerator.generateSignal(
+                                symbol,
+                                candleMap,
+                                priceEntity.price,
+                                System.currentTimeMillis()
+                            )
+
+                            if (signal != null) {
+                                _tradingSignals.emit(signal)
+                                executeTrade(signal, priceEntity.price)
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error analyzing trades")
+            } finally {
+                _isTrading.value = false
+            }
+        }
+    }
+
+    private suspend fun executeTrade(signal: TradingSignal, currentPrice: Double) {
+        if (!riskManager.canOpenTrade(_totalProfitLoss.value)) {
+            Timber.w("Daily loss limit reached")
+            return
+        }
+
+        val stopLoss = riskManager.calculateStopLoss(currentPrice)
+        val takeProfit = riskManager.calculateTakeProfit(currentPrice, 2.0, stopLoss)
+        val positionSize = riskManager.calculatePositionSize(currentPrice, stopLoss)
+
+        if (!riskManager.validateTradeSize(positionSize)) {
+            Timber.w("Invalid trade size: $positionSize")
+            return
+        }
+
+        val trade = TradeEntity(
+            id = 0,
+            symbol = signal.symbol,
+            side = if (signal.signalType.name == "BUY") "BUY" else "SELL",
+            entryPrice = currentPrice,
+            quantity = positionSize,
+            stopLoss = stopLoss,
+            takeProfit = takeProfit,
+            entryTime = System.currentTimeMillis(),
+            status = "OPEN",
+            isPaperTrade = true,
+            profitLoss = 0.0,
+            profitLossPercent = 0.0
+        )
+
+        val tradeId = tradeRepository.insertTrade(trade)
+        Timber.d("Trade opened: $tradeId for ${signal.symbol}")
+    }
+
+    fun closeOpenTrades() {
+        viewModelScope.launch {
+            priceRepository.getAllPrices().collect { prices ->
+                _currentTrades.value.forEach { trade ->
+                    val price = prices.find { it.symbol == trade.symbol }?.price
+                    if (price != null) {
+                        val (pl, plPercent) = riskManager.calculateProfitLoss(
+                            trade.entryPrice,
+                            price,
+                            trade.quantity,
+                            trade.side
+                        )
+
+                        val closedTrade = trade.copy(
+                            status = "CLOSED",
+                            exitPrice = price,
+                            exitTime = System.currentTimeMillis(),
+                            profitLoss = pl,
+                            profitLossPercent = plPercent
+                        )
+
+                        tradeRepository.updateTrade(closedTrade)
+                        _totalProfitLoss.value += pl
+                    }
+                }
+            }
+        }
+    }
+}
