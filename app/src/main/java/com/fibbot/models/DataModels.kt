@@ -1,5 +1,7 @@
 package com.fibbot.models
 
+import com.fibbot.database.entity.CandleEntity
+
 enum class SignalType {
     BUY, SELL, HOLD
 }
@@ -37,7 +39,7 @@ data class TradingSignal(
 )
 
 data class ChartData(
-    val candles: List<com.fibbot.database.entity.CandleEntity>,
+    val candles: List<CandleEntity>,
     val ema9: List<Double>,
     val ema21: List<Double>,
     val rsi14: List<Double>,
