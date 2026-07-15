@@ -3,6 +3,6 @@
     <style name="Theme.FibBot" parent="android:Theme.Material.Light.DarkActionBar">
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
-        <item name="android:colorAccent">@color/secondary</item>
+        <item name="android:colorAccent">@color/accent</item>
     </style>
 </resources>

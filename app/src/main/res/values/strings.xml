@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FibBot</string>
-    <string name="trading_screen">Trading</string>
-    <string name="chart_screen">Chart</string>
+    <string name="trading">Trading</string>
+    <string name="chart">Chart</string>
     <string name="start_trading">Start Trading</string>
-    <string name="close_all">Close All</string>
-    <string name="active_trades">Active Trades</string>
-    <string name="no_active_trades">No Active Trades</string>
+    <string name="close_all">Close All Trades</string>
     <string name="total_pl">Total P&L</string>
     <string name="open_trades">Open Trades</string>
+    <string name="active_trades">Active Trades</string>
+    <string name="no_active_trades">No Active Trades</string>
+    <string name="analyzing">Analyzing...</string>
+    <string name="entry_price">Entry</string>
+    <string name="stop_loss">SL</string>
+    <string name="take_profit">TP</string>
+    <string name="quantity">Qty</string>
+    <string name="symbol">Symbol</string>
     <string name="price_data">Price Data</string>
     <string name="indicators">Indicators</string>
-    <string name="analyzing">Analyzing...</string>
-    <string name="entry_price">Entry Price</string>
-    <string name="stop_loss">Stop Loss</string>
-    <string name="take_profit">Take Profit</string>
-    <string name="quantity">Quantity</string>
-    <string name="chart_analysis">Chart Analysis</string>
+    <string name="open">Open</string>
+    <string name="high">High</string>
+    <string name="low">Low</string>
+    <string name="close">Close</string>
 </resources>

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="primary">#0FA3B1</color>
-    <color name="primary_dark">#0D7A89</color>
-    <color name="secondary">#03DAC6</color>
-    <color name="error">#CF6679</color>
-    <color name="background">#121212</color>
-    <color name="surface">#1E1E1E</color>
+    <color name="primary_dark">#0D8A96</color>
+    <color name="accent">#03DAC6</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="success">#4CAF50</color>
-    <color name="warning">#FFC107</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="divider">#BDBDBD</color>
+    <color name="buy_signal">#4CAF50</color>
+    <color name="sell_signal">#F44336</color>
+    <color name="hold_signal">#FF9800</color>
 </resources>

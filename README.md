@@ -1,207 +1,116 @@
-# Fib Bot - Binance Fibonacci Trading Bot for Android
+# FibBot - Fibonacci Retracement Trading Bot
 
-A professional-grade Android trading application built with Jetpack Compose and Material 3, featuring real-time Fibonacci retracement analysis, technical indicators, and paper trading simulation.
+A sophisticated Android trading bot that leverages Fibonacci retracement levels combined with technical indicators (EMA, RSI, MACD, ATR, Bollinger Bands) to generate automated trading signals on the Binance exchange.
 
 ## Features
 
-### 📊 Core Trading Features
-- **Real-time Watchlist**: Live spot trading pairs from Binance WebSocket
-- **TradingView-style Charts**: Interactive candlestick charts with multiple timeframes
-- **Fibonacci Retracement**: Automatic calculation from recent swing highs/lows
-- **Technical Indicators**: 9 EMA, 21 EMA, RSI (14), MACD
-- **Trading Signals**: Intelligent Buy/Sell/Hold signals based on multi-indicator analysis
-- **Paper Trading**: Risk-free simulation mode (default)
-- **Trade History**: Complete trade records with profit/loss statistics
+### Core Trading Strategy
+- **Fibonacci Retracement Analysis**: Automatic identification of swing highs/lows and calculation of key Fibonacci levels (23.6%, 38.2%, 50%, 61.8%, 78.6%)
+- **Multi-Indicator Analysis**: 
+  - EMA (9 & 21 period)
+  - RSI (14 period)
+  - MACD with signal line
+  - ATR for volatility measurement
+  - Bollinger Bands for range identification
 
-### 🔐 Security & Configuration
-- **Secure API Key Storage**: Android EncryptedSharedPreferences
-- **Risk Management**: Stop-loss, take-profit, max trade size, daily loss limit
-- **Settings Screen**: API key and strategy configuration
+### Signal Generation
+- Confidence-based trading signals (BUY/SELL/HOLD)
+- Signal strength calculation based on indicator convergence
+- Real-time analysis of market conditions
 
-### 🎨 User Interface
-- **Material 3 Design**: Modern, responsive UI
-- **Dark Mode Support**: Full dark theme
-- **Real-time Notifications**: Signal alerts
-- **Loading Indicators**: Smooth UX feedback
+### Risk Management
+- Dynamic position sizing based on account risk
+- Stop-loss and take-profit calculation
+- Daily loss limits
+- Trade validation and risk assessment
 
-## Quick Start
+### Data Management
+- Real-time candle data from Binance
+- Local Room database for persistent storage
+- Price caching system
+- Trade history tracking
 
-### Prerequisites
-- Android Studio 2022.1+
-- Android SDK 26+ (API level)
-- Kotlin 1.8+
-
-### Setup
-
-1. **Clone Repository**
-   ```bash
-   git clone https://github.com/moegamatjunaid150-arch/Junaid-fibbot-binance1.git
-   ```
-
-2. **Get Binance API Keys**
-   - Visit https://www.binance.com
-   - Go to Account → API Management
-   - Create new API key with Spot Trading permissions
-   - Copy API Key and Secret Key
-
-3. **Build & Run**
-   ```bash
-   ./gradlew build
-   ./gradlew installDebug
-   ```
-
-4. **Configure API Keys**
-   - Open app
-   - Go to Settings
-   - Enter API Key and Secret Key (encrypted storage)
-   - Save and test connection
+### User Interface
+- **Trading Screen**: Active trade management and portfolio statistics
+- **Chart Screen**: Real-time technical analysis visualization
+- Material Design 3 with Jetpack Compose
+- Dark/Light theme support
 
 ## Architecture
 
-- **MVVM Pattern**: Clean separation of concerns
-- **Repository Pattern**: Data abstraction
-- **Room Database**: Local persistence
-- **Retrofit**: REST API
-- **OkHttp WebSockets**: Real-time streaming
-- **Hilt**: Dependency injection
-- **Coroutines & Flow**: Async operations
-
-## Technical Stack
-
-- Jetpack Compose for UI
-- Material 3 Design System
-- Room for Database
-- Retrofit & OkHttp for APIs
-- Hilt for DI
-- Kotlin Coroutines
-- AndroidX Security for encryption
-
-## Project Structure
-
 ```
-app/src/main/java/com/fibbot/
-├── api/              # Binance API clients
-├── database/         # Room database & DAOs
-├── models/           # Data models
-├── repository/       # Data repositories
-├── strategy/         # Trading strategy logic
-├── ui/              # Compose screens & components
-├── viewmodel/       # MVVM ViewModels
-└── utils/           # Utilities & constants
+com.fibbot/
+├── api/                 # Binance REST and WebSocket clients
+├── database/            # Room database entities and DAOs
+├── di/                  # Dependency injection
+├── models/              # Data models and DTOs
+├── repository/          # Data layer repositories
+├── strategy/            # Trading logic and calculations
+├── ui/                  # Jetpack Compose screens
+└── viewmodel/           # MVVM ViewModels
 ```
 
-## Usage
+## Technology Stack
 
-### Main Screen
-- View real-time watchlist
-- See current trading signals
-- Quick access to charts and history
+- **Language**: Kotlin
+- **UI Framework**: Jetpack Compose
+- **Database**: Room
+- **Networking**: Retrofit + OkHttp
+- **Async**: Coroutines + Flow
+- **Serialization**: Gson, Kotlinx Serialization
+- **Logging**: Timber
 
-### Watchlist
-- Live price updates
-- 24h change percentages
-- Volume information
-- Tap to view detailed chart
-
-### Chart
-- Interactive candlestick charts
-- Multiple timeframes (1m, 5m, 15m, 1h, 4h, 1d)
-- Fibonacci levels overlay
-- Technical indicator overlays
-- Trading signals
-
-### Trade History
-- All trades executed in paper trading
-- Entry/exit prices
-- Profit/loss per trade
-- Win rate statistics
-- Performance analytics
-
-### Settings
-- API key management
-- Trading pair configuration
-- Strategy parameter tuning
-- Risk management settings
-- Test API connection
-
-## Security
-
-✅ Implemented:
-- Encrypted API key storage (EncryptedSharedPreferences)
-- HTTPS-only API communication
-- No API keys in logs
-- Secure signature generation
-
-⚠️ Best Practices:
-- Enable IP whitelist on Binance
-- Use read-only API keys when possible
-- Rotate keys periodically
-- Monitor account activity
-
-## Troubleshooting
-
-**API Connection Failed**
-- Check internet connection
-- Verify API credentials in Settings
-- Ensure correct Binance API permissions
-- Check IP whitelist settings
-
-**WebSocket Issues**
-- App auto-reconnects
-- Check network connectivity
-- Clear app cache
-- Restart app
-
-**No Signals Generated**
-- Verify candlestick data loading
-- Check strategy parameters
-- Ensure sufficient historical data (21+ candles)
-- Review logs
-
-## Testing
+## Building & Running
 
 ```bash
-# Unit tests
-./gradlew test
+# Clone the repository
+git clone <repository-url>
 
-# Instrumented tests
-./gradlew connectedAndroidTest
+# Build the project
+./gradlew build
+
+# Run on emulator/device
+./gradlew installDebug
 ```
 
-## Future Features
+## Configuration
 
-- [ ] Real trading capability
-- [ ] Futures trading support
-- [ ] Advanced chart tools
-- [ ] ML-based signals
-- [ ] Multi-exchange support
-- [ ] Cloud backup
-- [ ] Bot automation
-- [ ] Strategy backtesting
+Key configuration parameters in `RiskManager`:
+- **Account Balance**: $1000 (default)
+- **Risk Per Trade**: 2% (default)
+- **Max Daily Loss**: 5% (default)
+
+## API Integration
+
+- **REST API**: Binance REST endpoint for historical data and current prices
+- **WebSocket**: Real-time price and candle updates
+- Base URL: `https://api.binance.com`
+
+## Trading Modes
+
+- **Paper Trading**: Demo mode for testing strategies without real capital
+- Configurable for live trading with proper risk management
+
+## Performance
+
+- Efficient multi-indicator calculations
+- Local caching to reduce API calls
+- Coroutine-based async operations
+- Optimized database queries
+
+## Future Enhancements
+
+- Advanced machine learning signal validation
+- Portfolio backtesting engine
+- Multi-timeframe analysis
+- Advanced position management
+- Strategy performance analytics
+- Webhook notifications
 
 ## License
 
-MIT License - See LICENSE file
+MIT License
 
 ## Support
 
-For issues:
-1. Check Troubleshooting section
-2. Review GitHub Issues
-3. Check Binance API docs
-4. Create new GitHub Issue with details
-
-## Disclaimer
-
-**IMPORTANT**: This is a simulation app (paper trading only). Always:
-- Test strategies thoroughly
-- Understand trading risks
-- Never share API keys
-- Monitor your account
-- Do your own research
-
-**Trading involves substantial risk of loss.**
-
----
-
-Version 1.0.0 | July 2026
+For issues, feature requests, or contributions, please open a GitHub issue or pull request.

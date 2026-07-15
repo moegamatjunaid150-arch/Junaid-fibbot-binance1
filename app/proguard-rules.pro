@@ -1,28 +1,33 @@
--keepattributes *Annotation*
--keepattributes SourceFile,LineNumberTable
--keep public class * extends java.lang.Exception
--keep public class * extends androidx.compose.**
+-keep class com.fibbot.** { *; }
+-keep class com.fibbot.models.** { *; }
+-keep class com.fibbot.api.** { *; }
 
 # Retrofit
--keepclasseswithmembernames class * {
-    @retrofit2.http.* <methods>;
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers class * {
+    @retrofit2.http.<Method> <methods>;
 }
 
 # OkHttp
--keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+-dontwarn okhttp3.**
+-dontwarn okio.**
 
-# GSON
+# Gson
+-keep class com.google.gson.** { *; }
 -keepclassmembers class * {
-  @com.google.gson.annotations.SerializedName <fields>;
+    @com.google.gson.annotations.SerializedName <fields>;
 }
 
 # Room
--keep class * extends androidx.room.RoomDatabase
--keep @androidx.room.Entity class *
+-keep class androidx.room.** { *; }
+-keepclassmembers class * extends androidx.room.RoomDatabase { *; }
 
-# Hilt
--keep class dagger.hilt.** { *; }
--keep class javax.inject.** { *; }
+# Coroutines
+-keepclassmembers class kotlinx.coroutines.** { *; }
 
-# Timber
--dontwarn org.jetbrains.annotations.**
+# Serialization
+-keepclassmembers class * {
+    @kotlinx.serialization.Serializable <fields>;
+}
