@@ -8,8 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.fibbot.database.entity.TradeEntity
 import com.fibbot.viewmodel.TradingViewModel
+import com.fibbot.database.entity.TradeEntity
 
 @Composable
 fun TradingScreen(viewModel: TradingViewModel) {
