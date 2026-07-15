@@ -1,0 +1,33 @@
+# Gradle
+.gradle/
+build/
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Local properties
+local.properties
+
+# Build outputs
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Kotlin
+kotlin-build/
+
+# System
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+
+# Keys and Secrets
+*.key
+*.pem
+*.keystore
