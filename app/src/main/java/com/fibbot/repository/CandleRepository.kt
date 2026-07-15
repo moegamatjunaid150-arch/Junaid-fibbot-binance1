@@ -2,7 +2,7 @@ package com.fibbot.repository
 
 import com.fibbot.api.BinanceRestClient
 import com.fibbot.database.dao.CandleDao
-import com.fibbot.models.CandleEntity
+import com.fibbot.database.entity.CandleEntity
 import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 

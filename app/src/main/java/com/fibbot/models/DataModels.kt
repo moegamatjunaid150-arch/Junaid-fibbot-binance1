@@ -1,60 +1,6 @@
 package com.fibbot.models
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class BinanceTickerPrice(
-    val symbol: String,
-    val price: String
-)
-
-@Serializable
-data class BinanceExchangeInfo(
-    val timezone: String,
-    val serverTime: Long,
-    val symbols: List<Map<String, Any>>
-)
-
-@Serializable
-data class BinanceWebSocketKline(
-    val e: String,
-    val E: Long,
-    val s: String,
-    val k: KlineData
-)
-
-@Serializable
-data class KlineData(
-    val t: Long,
-    val T: Long,
-    val s: String,
-    val i: String,
-    val f: Long,
-    val L: Long,
-    val o: String,
-    val c: String,
-    val h: String,
-    val l: String,
-    val v: String,
-    val n: Long,
-    val x: Boolean,
-    val q: String,
-    val V: String,
-    val Q: String
-)
-
-@Serializable
-data class BinanceWebSocketTicker(
-    val e: String,
-    val E: Long,
-    val s: String,
-    val c: String,
-    val o: String,
-    val h: String,
-    val l: String,
-    val v: String,
-    val q: String
-)
+import com.fibbot.database.entity.CandleEntity
 
 enum class SignalType {
     BUY, SELL, HOLD
@@ -104,39 +50,4 @@ data class ChartData(
     val bbSma: List<Double>,
     val bbUpper: List<Double>,
     val bbLower: List<Double>
-)
-
-data class CandleEntity(
-    val id: Long = 0,
-    val symbol: String,
-    val interval: String,
-    val timestamp: Long,
-    val open: Double,
-    val high: Double,
-    val low: Double,
-    val close: Double,
-    val volume: Double
-)
-
-data class TradeEntity(
-    val id: Long = 0,
-    val symbol: String,
-    val side: String,
-    val entryPrice: Double,
-    val quantity: Double,
-    val stopLoss: Double,
-    val takeProfit: Double,
-    val entryTime: Long,
-    val exitTime: Long? = null,
-    val exitPrice: Double? = null,
-    val status: String,
-    val isPaperTrade: Boolean = true,
-    val profitLoss: Double = 0.0,
-    val profitLossPercent: Double = 0.0
-)
-
-data class PriceCacheEntity(
-    val symbol: String,
-    val price: Double,
-    val timestamp: Long = System.currentTimeMillis()
 )

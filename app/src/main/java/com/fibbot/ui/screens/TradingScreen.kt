@@ -1,13 +1,15 @@
 package com.fibbot.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fibbot.database.entity.TradeEntity
 import com.fibbot.viewmodel.TradingViewModel
-import com.fibbot.models.TradeEntity
 
 @Composable
 fun TradingScreen(viewModel: TradingViewModel) {
@@ -72,8 +74,8 @@ fun TradingScreen(viewModel: TradingViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(currentTrades.size) { index ->
-                    TradeCard(trade = currentTrades[index])
+                items(currentTrades) { trade ->
+                    TradeCard(trade = trade)
                 }
             }
         } else {
@@ -170,17 +172,4 @@ fun TradeCard(trade: TradeEntity) {
             }
         }
     }
-}
-
-@Composable
-fun LazyColumn(
-    modifier: Modifier = Modifier,
-    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
-    content: @Composable LazyListScope.() -> Unit
-) {
-    androidx.compose.foundation.lazy.LazyColumn(
-        modifier = modifier,
-        verticalArrangement = verticalArrangement,
-        content = content
-    )
 }

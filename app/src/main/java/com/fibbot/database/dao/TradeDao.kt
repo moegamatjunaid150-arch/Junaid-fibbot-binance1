@@ -1,7 +1,7 @@
 package com.fibbot.database.dao
 
 import androidx.room.*
-import com.fibbot.models.TradeEntity
+import com.fibbot.database.entity.TradeEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
