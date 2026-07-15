@@ -12,6 +12,9 @@ interface TradeDao {
     @Update
     suspend fun updateTrade(trade: TradeEntity)
 
+    @Delete
+    suspend fun deleteTrade(trade: TradeEntity)
+
     @Query("SELECT * FROM trades WHERE symbol = :symbol ORDER BY entryTime DESC")
     fun getTradesBySymbol(symbol: String): Flow<List<TradeEntity>>
 
@@ -21,17 +24,20 @@ interface TradeDao {
     @Query("SELECT * FROM trades WHERE status = 'OPEN' ORDER BY entryTime DESC")
     fun getOpenTrades(): Flow<List<TradeEntity>>
 
-    @Query("SELECT * FROM trades WHERE status = 'CLOSED' ORDER BY exitTime DESC LIMIT :limit")
+    @Query("SELECT * FROM trades WHERE status = 'CLOSED' ORDER BY entryTime DESC LIMIT :limit")
     fun getClosedTrades(limit: Int = 100): Flow<List<TradeEntity>>
 
     @Query("SELECT * FROM trades WHERE id = :tradeId")
     suspend fun getTradeById(tradeId: Long): TradeEntity?
 
-    @Query("SELECT COUNT(*) FROM trades WHERE isPaperTrade = 1 AND status = 'CLOSED'")
+    @Query("SELECT COUNT(*) FROM trades WHERE status = 'CLOSED'")
     suspend fun getClosedTradesCount(): Int
 
-    @Query("SELECT SUM(profitLoss) FROM trades WHERE isPaperTrade = 1 AND status = 'CLOSED'")
+    @Query("SELECT SUM(profitLoss) FROM trades WHERE status = 'CLOSED'")
     suspend fun getTotalProfitLoss(): Double?
+
+    @Query("SELECT COUNT(*) FROM trades WHERE status = 'CLOSED' AND profitLoss > 0")
+    suspend fun getWinningTradesCount(): Int
 
     @Query("DELETE FROM trades")
     suspend fun deleteAllTrades()
