@@ -2,7 +2,7 @@ package com.fibbot.repository
 
 import com.fibbot.api.BinanceRestClient
 import com.fibbot.database.dao.PriceDao
-import com.fibbot.models.PriceCacheEntity
+import com.fibbot.database.entity.PriceCacheEntity
 import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 

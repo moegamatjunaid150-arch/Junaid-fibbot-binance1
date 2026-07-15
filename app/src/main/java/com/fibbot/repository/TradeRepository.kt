@@ -1,7 +1,7 @@
 package com.fibbot.repository
 
 import com.fibbot.database.dao.TradeDao
-import com.fibbot.models.TradeEntity
+import com.fibbot.database.entity.TradeEntity
 import kotlinx.coroutines.flow.Flow
 
 class TradeRepository(private val tradeDao: TradeDao) {
@@ -45,12 +45,8 @@ class TradeRepository(private val tradeDao: TradeDao) {
         val closedCount = getClosedTradesCount()
         if (closedCount == 0) return 0f
 
-        val totalPL = getTotalProfitLoss()
-        val winningTrades = getAllTrades()
-            .collect { trades ->
-                trades.count { it.status == "CLOSED" && it.profitLoss > 0 }
-            }
-        return if (closedCount > 0) (winningTrades.toFloat() / closedCount) * 100 else 0f
+        val winningTradeCount = tradeDao.getWinningTradesCount()
+        return if (closedCount > 0) (winningTradeCount.toFloat() / closedCount) * 100 else 0f
     }
 
     suspend fun deleteAllTrades() {

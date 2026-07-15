@@ -3,17 +3,15 @@ package com.fibbot.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fibbot.repository.CandleRepository
-import com.fibbot.repository.TradeRepository
 import com.fibbot.repository.PriceRepository
+import com.fibbot.repository.TradeRepository
 import com.fibbot.strategy.SignalGenerator
 import com.fibbot.strategy.RiskManager
-import com.fibbot.models.TradeEntity
+import com.fibbot.database.entity.TradeEntity
 import com.fibbot.models.TradingSignal
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.UUID
-
 class TradingViewModel(
     private val candleRepository: CandleRepository,
     private val tradeRepository: TradeRepository,

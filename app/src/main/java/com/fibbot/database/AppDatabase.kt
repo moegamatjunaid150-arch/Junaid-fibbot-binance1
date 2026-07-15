@@ -5,11 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.fibbot.database.dao.CandleDao
-import com.fibbot.database.dao.TradeDao
 import com.fibbot.database.dao.PriceDao
-import com.fibbot.models.CandleEntity
-import com.fibbot.models.TradeEntity
-import com.fibbot.models.PriceCacheEntity
+import com.fibbot.database.dao.TradeDao
+import com.fibbot.database.entity.CandleEntity
+import com.fibbot.database.entity.PriceCacheEntity
+import com.fibbot.database.entity.TradeEntity
 
 @Database(
     entities = [
