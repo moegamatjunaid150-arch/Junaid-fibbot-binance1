@@ -38,6 +38,7 @@ android {
     }
     packagingOptions {
         resources {
+            // Exclude duplicate META-INF files from OkHttp and Kotlin coroutines
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
             excludes += '/META-INF/INDEX.LIST'
             excludes += '/META-INF/io.netty.versions.properties'
@@ -65,6 +66,9 @@ dependencies {
     implementation 'androidx.room:room-runtime:2.6.0'
     implementation 'androidx.room:room-ktx:2.6.0'
     kapt 'androidx.room:room-compiler:2.6.0'
+
+    // Secure storage for API keys
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
     // Retrofit & OkHttp
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'

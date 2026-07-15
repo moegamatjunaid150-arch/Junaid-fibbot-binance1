@@ -59,30 +59,31 @@ class TradingViewModel(
                 candleRepository.fetchAndCacheCandles(symbol, interval)
                 priceRepository.fetchAndCachePrice(symbol)
 
-                candleRepository.getCandlesBySymbolAndInterval(symbol, interval).collect { candles ->
-                    priceRepository.getPriceBySymbol(symbol).collect { priceEntity ->
-                        if (candles.isNotEmpty() && priceEntity != null) {
-                            val candleMap = candles.map { candle ->
-                                mapOf(
-                                    "open" to candle.open,
-                                    "high" to candle.high,
-                                    "low" to candle.low,
-                                    "close" to candle.close,
-                                    "volume" to candle.volume
-                                )
-                            }
+                val candles = candleRepository.getCandlesBySymbolAndInterval(symbol, interval).firstOrNull()
+                val priceEntity = priceRepository.getPriceBySymbol(symbol).firstOrNull()
 
-                            val signal = signalGenerator.generateSignal(
-                                symbol,
-                                candleMap,
-                                priceEntity.price,
-                                System.currentTimeMillis()
-                            )
+                if (!candles.isNullOrEmpty() && priceEntity != null) {
+                    val candleMap = candles.map { candle ->
+                        mapOf(
+                            "open" to candle.open,
+                            "high" to candle.high,
+                            "low" to candle.low,
+                            "close" to candle.close,
+                            "volume" to candle.volume
+                        )
+                    }
 
-                            if (signal != null) {
-                                _tradingSignals.emit(signal)
-                                executeTrade(signal, priceEntity.price)
-                            }
+                    val signal = signalGenerator.generateSignal(
+                        symbol,
+                        candleMap,
+                        priceEntity.price,
+                        System.currentTimeMillis()
+                    )
+
+                    if (signal != null) {
+                        _tradingSignals.emit(signal)
+                        if (signal.signalType != com.fibbot.models.SignalType.HOLD) {
+                            executeTrade(signal, priceEntity.price)
                         }
                     }
                 }
@@ -109,10 +110,16 @@ class TradingViewModel(
             return
         }
 
+        val side = when (signal.signalType) {
+            com.fibbot.models.SignalType.BUY -> "BUY"
+            com.fibbot.models.SignalType.SELL -> "SELL"
+            else -> return
+        }
+
         val trade = TradeEntity(
             id = 0,
             symbol = signal.symbol,
-            side = if (signal.signalType.name == "BUY") "BUY" else "SELL",
+            side = side,
             entryPrice = currentPrice,
             quantity = positionSize,
             stopLoss = stopLoss,
@@ -125,12 +132,13 @@ class TradingViewModel(
         )
 
         val tradeId = tradeRepository.insertTrade(trade)
-        Timber.d("Trade opened: $tradeId for ${signal.symbol} (paper=${trade.isPaperTrade})")
+        Timber.d("Trade opened: $tradeId for ${signal.symbol} (side=$side, paper=${trade.isPaperTrade})")
     }
 
     fun closeOpenTrades() {
         viewModelScope.launch {
-            priceRepository.getAllPrices().collect { prices ->
+            try {
+                val prices = priceRepository.getAllPrices().firstOrNull() ?: return@launch
                 _currentTrades.value.forEach { trade ->
                     val price = prices.find { it.symbol == trade.symbol }?.price
                     if (price != null) {
@@ -153,6 +161,8 @@ class TradingViewModel(
                         _totalProfitLoss.value += pl
                     }
                 }
+            } catch (e: Exception) {
+                Timber.e(e, "Error closing trades")
             }
         }
     }

@@ -19,6 +19,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, modifier: Modifier = Modifier) 
     val apiKey by viewModel.apiKey.collectAsState()
     val apiSecret by viewModel.apiSecret.collectAsState()
     val saveStatus by viewModel.saveStatus.collectAsState()
+    var showApiKey by remember { mutableStateOf(false) }
     var showSecret by remember { mutableStateOf(false) }
 
     Column(
@@ -57,7 +58,13 @@ fun SettingsScreen(viewModel: SettingsViewModel, modifier: Modifier = Modifier) 
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = if (showApiKey) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        TextButton(onClick = { showApiKey = !showApiKey }) {
+                            Text(if (showApiKey) "Hide" else "Show")
+                        }
+                    }
                 )
 
                 OutlinedTextField(

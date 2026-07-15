@@ -2,16 +2,32 @@ package com.fibbot.security
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 
 /**
- * Manages Binance API keys securely using SharedPreferences.
+ * Manages Binance API keys securely using EncryptedSharedPreferences.
  * Keys are never hardcoded — users must enter them via the Settings screen.
- * For production, consider migrating to EncryptedSharedPreferences for at-rest encryption.
+ * Data is encrypted at rest using AES256-GCM (key) and AES256-SIV (value).
  */
 class ApiKeyManager(private val context: Context) {
 
     private val prefs: SharedPreferences by lazy {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            // Fallback to plain SharedPreferences if encryption is unavailable
+            context.getSharedPreferences(PREFS_NAME + "_plain", Context.MODE_PRIVATE)
+        }
     }
 
     fun getApiKey(): String = prefs.getString(KEY_API_KEY, "") ?: ""
@@ -36,7 +52,7 @@ class ApiKeyManager(private val context: Context) {
     fun hasApiKeys(): Boolean = getApiKey().isNotEmpty() && getApiSecret().isNotEmpty()
 
     companion object {
-        private const val PREFS_NAME = "fibbot_api_keys"
+        private const val PREFS_NAME = "fibbot_api_keys_encrypted"
         private const val KEY_API_KEY = "binance_api_key"
         private const val KEY_API_SECRET = "binance_api_secret"
     }
